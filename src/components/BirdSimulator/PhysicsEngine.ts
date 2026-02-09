@@ -4,7 +4,9 @@ export class Point {
     y: number;
     oldX: number;
     oldY: number;
-    pinned: boolean;
+    pinned: boolean; // Is this point fixed in space?
+    forceX: number = 0; // Accumulated X force
+    forceY: number = 0; // Accumulated Y force
 
     constructor(x: number, y: number, pinned: boolean = false) {
         this.x = x;
@@ -12,6 +14,12 @@ export class Point {
         this.oldX = x;
         this.oldY = y;
         this.pinned = pinned;
+    }
+
+    applyForce(fx: number, fy: number) {
+        if (this.pinned) return;
+        this.forceX += fx;
+        this.forceY += fy;
     }
 
     update(gravity: number, friction: number) {
@@ -23,8 +31,12 @@ export class Point {
         this.oldX = this.x;
         this.oldY = this.y;
 
-        this.x += vx;
-        this.y += vy + gravity;
+        this.x += vx + this.forceX;
+        this.y += vy + gravity + this.forceY;
+
+        // Reset forces
+        this.forceX = 0;
+        this.forceY = 0;
     }
 
     constrain(width: number, height: number, bounce: number = 0.9) {
@@ -61,6 +73,10 @@ export class Stick {
     phase: number;
     amplitude: number;
 
+    // Visualization properties
+    liftForce: { x: number, y: number } = { x: 0, y: 0 };
+    dragForce: { x: number, y: number } = { x: 0, y: 0 };
+
     constructor(p0: Point, p1: Point, length?: number, isMuscle: boolean = false) {
         this.p0 = p0;
         this.p1 = p1;
@@ -74,6 +90,98 @@ export class Stick {
         this.frequency = 0.05; // Speed of contraction
         this.phase = 0; // Offset
         this.amplitude = 0.3; // How much it contracts (30%)
+    }
+
+    calculateAeroForces(airDensity: number) {
+        // 1. Calculate Stick Velocity (average of points)
+        // Note: we use (x - oldX) as velocity approximation
+        const vx0 = this.p0.x - this.p0.oldX;
+        const vy0 = this.p0.y - this.p0.oldY;
+        const vx1 = this.p1.x - this.p1.oldX;
+        const vy1 = this.p1.y - this.p1.oldY;
+
+        const velX = (vx0 + vx1) / 2;
+        const velY = (vy0 + vy1) / 2;
+        const speedSq = velX * velX + velY * velY;
+        const speed = Math.sqrt(speedSq);
+
+        // If not moving, no forces
+        if (speed < 0.01) {
+            this.liftForce = { x: 0, y: 0 };
+            this.dragForce = { x: 0, y: 0 };
+            return;
+        }
+
+        // 2. Calculate Stick Direction
+        const dx = this.p1.x - this.p0.x;
+        const dy = this.p1.y - this.p0.y;
+        // Current length might act as "wing span" or "area"
+        const len = Math.sqrt(dx * dx + dy * dy);
+        if (len === 0) return;
+
+        // Normalized direction vector of the stick
+        const ndx = dx / len;
+        const ndy = dy / len;
+
+        // Normalized velocity vector
+        const nvx = velX / speed;
+        const nvy = velY / speed;
+
+        // 3. Calculate Angle of Attack
+        // Cross product in 2D gives the sine of the angle between vectors
+        // sin(theta) = v x d 
+        const crossProduct = nvx * ndy - nvy * ndx;
+        // Dot product gives cosine
+        const dotProduct = nvx * ndx + nvy * ndy;
+
+        // Model:
+        // Drag coefficient = C_d * sin^2(alpha)
+        // Lift coefficient = C_l * sin(alpha) * cos(alpha)
+
+        // Reuse crossProduct which is sin(alpha)
+        const sinAlpha = crossProduct;
+        const cosAlpha = dotProduct; // cos(alpha)
+
+        // Forces magnitude
+        // F = 0.5 * rho * v^2 * A * C
+        // We assume A (Area) is proportional to length 'len'
+        const dynamicPressure = 0.5 * airDensity * speedSq * len;
+
+        // Drag Factor: resists motion. 
+        // Max when plate is perpendicular to flow (sinAlpha = 1). Min when parallel.
+        const dragCoeff = Math.abs(sinAlpha * sinAlpha);
+        // We add a base drag for wireframes
+        const baseDrag = 0.01;
+        const dragMag = dynamicPressure * (dragCoeff + baseDrag);
+
+        // Lift Factor: Perpendicular to motion.
+        // Max at 45 degrees. sin(2*alpha) / 2 = sin * cos.
+        const liftCoeff = sinAlpha * cosAlpha;
+        const liftMag = dynamicPressure * liftCoeff;
+
+        // 4. Force Vectors
+        // Drag is opposite to velocity (-nvx, -nvy)
+        this.dragForce.x = -nvx * dragMag;
+        this.dragForce.y = -nvy * dragMag;
+
+        // Lift is perpendicular to velocity.
+        // Lift direction depends on angle of attack sign.
+        // If we rotate velocity 90 degrees: (-nvy, nvx)
+        // We need to check if this vector is "up" relative to the stick or "down".
+        // Actually simpler: Lift is perpendicular to Velocity. 
+        // Using `liftCoeff` sign (which comes from sinAlpha * cosAlpha), it should handle "up/down" correctly relative to the flow.
+        this.liftForce.x = -nvy * liftMag;
+        this.liftForce.y = nvx * liftMag;
+
+        // 5. Apply Forces to Points
+        // Distribute force evenly?
+        // Note: Verlet integration here is simple `x += force`.
+        // Our 'Force' here is actually an impulse/displacement adjustment for the frame.
+        // Need to calibrate airDensity to values that make sense (0.01 - 0.1 range maybe)
+        this.p0.applyForce(this.dragForce.x * 0.5, this.dragForce.y * 0.5);
+        this.p0.applyForce(this.liftForce.x * 0.5, this.liftForce.y * 0.5);
+        this.p1.applyForce(this.dragForce.x * 0.5, this.dragForce.y * 0.5);
+        this.p1.applyForce(this.liftForce.x * 0.5, this.liftForce.y * 0.5);
     }
 
     update(time: number) {
@@ -124,6 +232,7 @@ export class PhysicsEngine {
     sticks: Stick[] = [];
     gravity: number = 0.5;
     friction: number = 0.999;
+    airDensity: number = 0.05; // Standard air density
     width: number = 800;
     height: number = 600;
     time: number = 0;
@@ -147,8 +256,16 @@ export class PhysicsEngine {
 
     update() {
         this.time++;
+
+        // 1. Calculate Aerodynamics (Applied as external forces)
+        for (const s of this.sticks) {
+            s.calculateAeroForces(this.airDensity);
+        }
+
+        // 2. Update Points (Move based on inertia + gravity + forces)
         this.updatePoints();
-        // Solve constraints multiple times for stability
+
+        // 3. Solve constraints multiple times for stability
         for (let i = 0; i < 5; i++) {
             this.updateSticks();
             this.constrainPoints();
