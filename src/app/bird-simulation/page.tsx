@@ -7,7 +7,7 @@ import { SimulationViewer } from '@/components/BirdSimulator/SimulationViewer';
 
 export default function BirdSimulationPage() {
     const [engine, setEngine] = useState<PhysicsEngine | null>(null);
-    const [mode, setMode] = useState<'point' | 'line' | 'triangle' | 'box'>('point');
+    const [mode, setMode] = useState<'point' | 'line' | 'triangle' | 'box' | 'muscle' | 'creature'>('point');
 
     useEffect(() => {
         const newEngine = new PhysicsEngine(800, 500);
@@ -16,13 +16,13 @@ export default function BirdSimulationPage() {
         setEngine(newEngine);
     }, []);
 
-    const resetSimulation = (newMode: 'point' | 'line' | 'triangle' | 'box') => {
+    const resetSimulation = (newMode: 'point' | 'line' | 'triangle' | 'box' | 'muscle' | 'creature') => {
         if (!engine) return;
         setMode(newMode);
         engine.reset();
 
         const cx = engine.width / 2;
-        const cy = 100;
+        const cy = 200;
 
         if (newMode === 'point') {
             engine.addPoint(cx, cy);
@@ -48,6 +48,30 @@ export default function BirdSimulationPage() {
             engine.addStick(p4, p1);
             // Cross brace for stability
             engine.addStick(p1, p3);
+        } else if (newMode === 'muscle') {
+            const p1 = engine.addPoint(cx - 50, cy, true); // Pinned
+            const p2 = engine.addPoint(cx + 50, cy);
+            // Add a muscle
+            const m = engine.addStick(p1, p2, true);
+            m.frequency = 0.1;
+            // Add a weight at the end
+            engine.addPoint(cx + 50, cy + 50).pinned = false;
+        } else if (newMode === 'creature') {
+            // A simple creature ("Blob") with random muscles
+            const p1 = engine.addPoint(cx, cy);
+            const p2 = engine.addPoint(cx - 60, cy + 80);
+            const p3 = engine.addPoint(cx + 60, cy + 80);
+            const p4 = engine.addPoint(cx, cy + 50); // Center mass
+
+            // Outer triangle
+            engine.addStick(p1, p2, true).phase = Math.random() * 10;
+            engine.addStick(p2, p3, true).phase = Math.random() * 10;
+            engine.addStick(p3, p1, true).phase = Math.random() * 10;
+
+            // Internal bracing (muscles too! chaos!)
+            engine.addStick(p1, p4, true).phase = Math.random() * 10;
+            engine.addStick(p2, p4, true).phase = Math.random() * 10;
+            engine.addStick(p3, p4, true).phase = Math.random() * 10;
         }
     };
 
@@ -97,11 +121,26 @@ export default function BirdSimulationPage() {
                             >
                                 4. The Box (Structure)
                             </button>
+                            <div className="h-px bg-neutral-700 my-4"></div>
+                            <button
+                                onClick={() => resetSimulation('muscle')}
+                                className={`w-full p-3 rounded-lg font-semibold transition-all ${mode === 'muscle' ? 'bg-emerald-600 text-white' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
+                            >
+                                5. SINGLE MUSCLE (Rhythm)
+                            </button>
+                            <button
+                                onClick={() => resetSimulation('creature')}
+                                className={`w-full p-3 rounded-lg font-semibold transition-all ${mode === 'creature' ? 'bg-purple-600 text-white' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
+                            >
+                                6. THE CREATURE (Epilepsy)
+                            </button>
                         </div>
 
                         <div className="mt-8 pt-6 border-t border-neutral-800">
                             <p className="text-xs text-neutral-500 italic">
-                                "Au commencement, il y avait le point. Il tombe (gravité). C'est nul."
+                                {mode === 'muscle' || mode === 'creature'
+                                    ? '"C\'est énergétique, certes. Mais ça ne vole pas."'
+                                    : '"Au commencement, il y avait le point. Il tombe (gravité). C\'est nul."'}
                             </p>
                         </div>
                     </div>
