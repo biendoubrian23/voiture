@@ -2,119 +2,181 @@
 import { PhysicsEngine } from './PhysicsEngine';
 
 export interface DNA {
-    // Relative positions of nodes from a center (0,0)
     nodes: { x: number, y: number }[];
-    // Which nodes are connected [index1, index2]
     connections: [number, number][];
 }
 
 export class Creature {
     dna: DNA;
     fitness: number = 0;
+    isDead: boolean = false;
 
     constructor(dna?: DNA) {
         if (dna) {
             this.dna = dna;
         } else {
-            this.dna = this.createRandomDNA();
+            this.dna = this.createRandomSymmetricDNA();
         }
     }
 
-    createRandomDNA(): DNA {
+    createRandomSymmetricDNA(): DNA {
         const nodes: { x: number, y: number }[] = [];
         const connections: [number, number][] = [];
 
-        // Much more variance in node count (3 to 8)
-        const numNodes = 3 + Math.floor(Math.random() * 6);
-
-        // Create random nodes in a larger space
-        for (let i = 0; i < numNodes; i++) {
+        // 1. Spine (Central Axis)
+        const spineCount = 2 + Math.floor(Math.random() * 3); // 2-4
+        for (let i = 0; i < spineCount; i++) {
             nodes.push({
-                x: (Math.random() - 0.5) * 150, // Wider range (-75 to 75)
-                y: (Math.random() - 0.5) * 150
+                x: 0,
+                y: (Math.random() - 0.5) * 80 + (i * 30)
             });
         }
 
-        // Random Connections
-        // Minimum spanning tree + extra connections
-        // Simple approach: connect each node to 1-3 random other nodes
-        for (let i = 0; i < numNodes; i++) {
-            const numConnections = 1 + Math.floor(Math.random() * 2);
-            for (let k = 0; k < numConnections; k++) {
-                const target = Math.floor(Math.random() * numNodes);
-                if (target !== i) {
-                    // Avoid duplicates? simple check
-                    const exists = connections.some(c => (c[0] === i && c[1] === target) || (c[0] === target && c[1] === i));
-                    if (!exists) {
-                        connections.push([i, target]);
-                    }
+        // 2. Right Wing (Positive X)
+        const wingCount = 2 + Math.floor(Math.random() * 4); // 2-5
+        for (let i = 0; i < wingCount; i++) {
+            nodes.push({
+                x: 20 + Math.random() * 100,
+                y: (Math.random() - 0.5) * 100
+            });
+        }
+
+        // 3. Left Wing (Negative X, Placeholder, will form mirror)
+        // We add them now so indices align: [Spine..., Right..., Left...]
+        for (let i = 0; i < wingCount; i++) {
+            const rNode = nodes[spineCount + i];
+            nodes.push({ x: -rNode.x, y: rNode.y });
+        }
+
+        const leftStart = spineCount + wingCount;
+
+        // 4. Connect Spine
+        for (let i = 0; i < spineCount - 1; i++) {
+            connections.push([i, i + 1]);
+        }
+
+        // 5. Connect Right Wing
+        const rightStart = spineCount;
+        for (let i = 0; i < wingCount; i++) {
+            const currentIdx = rightStart + i;
+
+            // Connect to Spine check
+            const spineIdx = Math.floor(Math.random() * spineCount);
+            connections.push([currentIdx, spineIdx]);
+
+            // Connect to other Right node check
+            if (wingCount > 1) {
+                const other = Math.floor(Math.random() * wingCount);
+                if (other !== i) {
+                    const target = rightStart + other;
+                    // Avoid duplicate
+                    if (!connections.some(c => (c[0] === currentIdx && c[1] === target) || (c[0] === target && c[1] === currentIdx)))
+                        connections.push([currentIdx, target]);
                 }
             }
         }
 
-        // Ensure at least one connection exists if somehow failed (rare)
-        if (connections.length === 0 && numNodes > 1) {
-            connections.push([0, 1]);
-        }
+        // 6. Mirror Connections to Left
+        // Any connection involving Right Index R needs to be mirrored to Left Index L
+        // L = R + wingCount
+        // Spine index S maps to itself.
+
+        // We only iterate connections created so far (Spine & Right)
+        const initialConnections = [...connections];
+
+        initialConnections.forEach(([a, b]) => {
+            let mA = a;
+            let mB = b;
+
+            // Map Right -> Left
+            if (a >= rightStart && a < leftStart) mA = a + wingCount;
+            if (b >= rightStart && b < leftStart) mB = b + wingCount;
+
+            // If connection is different (not spine-spine), add it
+            if (mA !== a || mB !== b) {
+                if (!connections.some(c => (c[0] === mA && c[1] === mB) || (c[0] === mB && c[1] === mA)))
+                    connections.push([mA, mB]);
+            }
+        });
 
         return { nodes, connections };
     }
 
     mutate(rate: number) {
-        // 1. Mutate existing node positions (Geometry)
-        for (const node of this.dna.nodes) {
+        // GEOMETRY MUTATION (Respect Symmetry)
+        // We assume structure [Spine... Right... Left...]
+        const numNodes = this.dna.nodes.length;
+
+        // Heuristic to recover counts:
+        let spineCount = 0;
+        for (const n of this.dna.nodes) { if (Math.abs(n.x) < 0.001) spineCount++; }
+        const remaining = numNodes - spineCount;
+        const wingCount = remaining / 2;
+        const rightStart = spineCount;
+        const leftStart = spineCount + wingCount;
+
+        // Mutate Spine & Right
+        for (let i = 0; i < leftStart; i++) {
             if (Math.random() < rate) {
-                node.x += (Math.random() - 0.5) * 30; // Stronger drift
-                node.y += (Math.random() - 0.5) * 30;
-            }
-        }
+                const dx = (Math.random() - 0.5) * 30;
+                const dy = (Math.random() - 0.5) * 30;
 
-        // 2. Structural Mutation: Add/Remove Connections
-        if (Math.random() < rate) {
-            if (Math.random() < 0.5 && this.dna.nodes.length > 1) {
-                // Add connection
-                const i = Math.floor(Math.random() * this.dna.nodes.length);
-                const j = Math.floor(Math.random() * this.dna.nodes.length);
-                if (i !== j) {
-                    const exists = this.dna.connections.some(c => (c[0] === i && c[1] === j) || (c[0] === j && c[1] === i));
-                    if (!exists) this.dna.connections.push([i, j]);
+                this.dna.nodes[i].x += dx;
+                this.dna.nodes[i].y += dy;
+
+                // Constraints
+                if (i < spineCount) {
+                    this.dna.nodes[i].x = 0; // Spine stays center
+                } else {
+                    if (this.dna.nodes[i].x < 2) this.dna.nodes[i].x = 2; // Right stay positive
                 }
-            } else if (this.dna.connections.length > 1) {
-                // Remove connection (but keep at least 1)
-                const index = Math.floor(Math.random() * this.dna.connections.length);
-                this.dna.connections.splice(index, 1);
             }
         }
 
-        // 3. Structural Mutation: Add/Remove Nodes (Rare)
-        if (Math.random() < rate * 0.5) {
-            if (Math.random() < 0.5) {
-                // Add Node
-                this.dna.nodes.push({
-                    x: (Math.random() - 0.5) * 100,
-                    y: (Math.random() - 0.5) * 100
-                });
-                // Connect it to someone
-                const target = Math.floor(Math.random() * (this.dna.nodes.length - 1));
-                this.dna.connections.push([this.dna.nodes.length - 1, target]);
-            } else if (this.dna.nodes.length > 3) {
-                // Remove Node (clean up connections too)
-                const index = Math.floor(Math.random() * this.dna.nodes.length);
-                this.dna.nodes.splice(index, 1);
-                // Remove connections to this node
-                // And shift indices > index down
-                this.dna.connections = this.dna.connections.filter(c => c[0] !== index && c[1] !== index).map(c => {
-                    return [
-                        c[0] > index ? c[0] - 1 : c[0],
-                        c[1] > index ? c[1] - 1 : c[1]
-                    ] as [number, number];
-                });
+        // FORCE MIRROR to Left
+        for (let i = 0; i < wingCount; i++) {
+            const rIdx = rightStart + i;
+            const lIdx = leftStart + i;
+
+            if (this.dna.nodes[rIdx] && this.dna.nodes[lIdx]) {
+                this.dna.nodes[lIdx].x = -this.dna.nodes[rIdx].x;
+                this.dna.nodes[lIdx].y = this.dna.nodes[rIdx].y;
             }
         }
+
+        // TOPOLOGY MUTATION (Symmetric)
+        if (Math.random() < rate * 0.5) {
+            // Add Connection: Pick A and B from (Spine + Right)
+            const validIndices = leftStart; // 0 to leftStart-1 are Spine+Right
+            const idxA = Math.floor(Math.random() * validIndices);
+            const idxB = Math.floor(Math.random() * validIndices);
+
+            if (idxA !== idxB) {
+                // Check existence
+                if (!this.dna.connections.some(c => (c[0] === idxA && c[1] === idxB) || (c[0] === idxB && c[1] === idxA))) {
+                    this.dna.connections.push([idxA, idxB]);
+
+                    // Helper map
+                    const getMirror = (idx: number) => {
+                        if (idx < spineCount) return idx;
+                        return idx + wingCount;
+                    };
+
+                    const mA = getMirror(idxA);
+                    const mB = getMirror(idxB);
+
+                    if (mA !== idxA || mB !== idxB) { // Don't dupe spine-spine
+                        this.dna.connections.push([mA, mB]);
+                    }
+                }
+            }
+        }
+        // Remove Connection? Maybe later.
     }
 
-    // Helper to spawn this creature into the world
     spawn(engine: PhysicsEngine, x: number, y: number) {
+        if (!this.dna || this.dna.nodes.length === 0) return [];
+
         const points = this.dna.nodes.map(node => {
             return engine.addPoint(x + node.x, y + node.y);
         });

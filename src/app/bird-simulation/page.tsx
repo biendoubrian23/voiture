@@ -16,6 +16,7 @@ export default function BirdSimulationPage() {
     const [evoManager, setEvoManager] = useState<EvolutionManager | null>(null);
     const [gen, setGen] = useState(0);
     const [bestFit, setBestFit] = useState(0);
+    const [popSize, setPopSize] = useState(0);
     const evoRef = useRef<EvolutionManager | null>(null); // Ref to access inside closures if needed
 
     useEffect(() => {
@@ -102,6 +103,7 @@ export default function BirdSimulationPage() {
             const manager = new EvolutionManager(engine);
             manager.startEvolution();
             setEvoManager(manager);
+            setPopSize(manager.popSize);
             evoRef.current = manager;
         }
     };
@@ -191,11 +193,14 @@ export default function BirdSimulationPage() {
                                 <div className="space-y-1 text-center text-orange-400">
                                     <h3 className="text-3xl font-black">{gen}</h3>
                                     <p className="text-xs text-neutral-500 uppercase tracking-widest">GENERATION</p>
-                                    <div className="pt-2">
+                                    <div className="py-2 border-y border-neutral-800 my-2">
                                         <p className="text-lg font-bold text-white">{bestFit}</p>
                                         <p className="text-xs text-neutral-500">BEST TIME (Frames)</p>
                                     </div>
-                                    <p className="text-xs text-neutral-600 italic mt-4">"Survival of the flattest"</p>
+                                    <div>
+                                        <p className="text-sm font-bold text-emerald-400">Survivors: 10 / {popSize || 100}</p>
+                                        <p className="text-xs text-neutral-600 italic mt-2">"Only the best spread their genes."</p>
+                                    </div>
                                 </div>
                             ) : (
                                 <p className="text-xs text-neutral-500 italic font-mono">

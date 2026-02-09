@@ -6,12 +6,12 @@ export class EvolutionManager {
     engine: PhysicsEngine;
     population: Creature[] = [];
     generation: number = 0;
-    popSize: number = 100; // Increased population size for more diversity
+    popSize: number = 100;
     globalBestFitness: number = 0;
 
     // Simulation state
     timer: number = 0;
-    maxDuration: number = 800; // Frames (e.g. 13 seconds at 60fps) - longer for gliders
+    maxDuration: number = 800;
     isRunning: boolean = false;
 
     constructor(engine: PhysicsEngine) {
@@ -24,7 +24,7 @@ export class EvolutionManager {
         this.population = [];
         this.engine.reset();
 
-        // Initial "Cambrian Explosion"
+        // Initial Symmetric Population
         for (let i = 0; i < this.popSize; i++) {
             this.population.push(new Creature());
         }
@@ -47,14 +47,14 @@ export class EvolutionManager {
 
         // Spawn all creatures at top
         const startX = this.engine.width / 2;
-        const startY = 50; // Higher up to allow more fall time
+        const startY = 100; // Give them space
 
         this.population.forEach((creature, index) => {
             creature.fitness = 0;
+            creature.isDead = false; // RESET DEAD STATUS
 
-            // Random spread across the screen width
-            // This prevents them all from just stacking on top of each other
-            const spawnX = startX + (Math.random() - 0.5) * 700;
+            // Random spread but centered
+            const spawnX = startX + (Math.random() - 0.5) * 600;
             const spawnY = startY + (Math.random() - 0.5) * 50;
 
             // Spawn
@@ -72,22 +72,38 @@ export class EvolutionManager {
         let activeCount = 0;
 
         this.population.forEach(c => {
-            const points = (c as any).runtimePoints as Point[];
-            if (!points || points.length === 0) return;
+            if (c.isDead) return;
 
-            // Check if hit ground
+            const points = (c as any).runtimePoints as Point[];
+            // Safety Check
+            if (!points || points.length === 0) {
+                c.isDead = true;
+                return;
+            }
+
             let maxY = 0;
+            let hitWall = false;
+
             points.forEach(p => {
                 if (p.y > maxY) maxY = p.y;
+
+                // WALL PENALTY CHECK
+                if (p.x <= 0 || p.x >= this.engine.width) {
+                    hitWall = true;
+                }
             });
 
-            if (maxY >= this.engine.height - 10) {
-                // Dead (hit ground)
+            if (hitWall) {
+                // INSTANT DEATH
+                c.isDead = true;
+                c.fitness = Math.max(0, this.timer - 50);
+            } else if (maxY >= this.engine.height - 10) {
+                // Ground Hit
+                c.isDead = true;
                 if (c.fitness === 0) c.fitness = this.timer;
             } else {
                 allDead = false;
                 activeCount++;
-                // Still alive
                 c.fitness = this.timer;
             }
         });
@@ -98,7 +114,6 @@ export class EvolutionManager {
     }
 
     nextGeneration() {
-        // 1. Sort by fitness (Descending)
         this.population.sort((a, b) => b.fitness - a.fitness);
 
         const best = this.population[0];
@@ -106,23 +121,25 @@ export class EvolutionManager {
             this.globalBestFitness = best.fitness;
         }
 
-        // 2. Selection & Reproduction
+        console.log(`Generation ${this.generation} Complete. Best Time: ${best.fitness}. Survivors Copied: 10`);
+
         const newPop: Creature[] = [];
 
-        // Elitism (Top 5 - Keep the winners)
-        for (let i = 0; i < 5; i++) {
+        // ELITISM: Keep Top 10 (10% of 100)
+        // These are the "Rewarded" parents who survive unchanged.
+        for (let i = 0; i < 10; i++) {
             const elite = new Creature(JSON.parse(JSON.stringify(this.population[i].dna)));
             newPop.push(elite);
         }
 
-        // Fill rest
+        // REPRODUCTION: Fill the rest (90)
+        // Parents are chosen via Tournament from the old population.
+        // Better fitness = Higher chance to be picked.
         while (newPop.length < this.popSize) {
             const parent = this.tournamentSelect();
             const childDNA = JSON.parse(JSON.stringify(parent.dna));
             const child = new Creature(childDNA);
-            // High mutation rate initially to explore forms
-            // In later generations, we might want to lower it, but constant pressure is good for simple sims
-            child.mutate(0.15);
+            child.mutate(0.1);
             newPop.push(child);
         }
 
@@ -132,9 +149,8 @@ export class EvolutionManager {
     }
 
     tournamentSelect(): Creature {
-        // Tournament size controls selection pressure
-        // Larger size = stronger selection (fewer weak parents)
-        const size = 5;
+        // High pressure: pick 6 random, take best.
+        const size = 6;
         let best: Creature | null = null;
         for (let i = 0; i < size; i++) {
             const ind = this.population[Math.floor(Math.random() * this.population.length)];
