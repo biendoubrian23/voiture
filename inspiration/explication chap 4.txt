@@ -1,0 +1,12 @@
+C'est un phénomène fascinant qu'on observe souvent en algorithmique génétique : l'évolution a trouvé une triche !
+
+Voici ce qui se passe :
+
+Le Plané Latéral : Tes créatures aléatoires ont des formes bizarres. Beaucoup d'entre elles, au lieu de tomber tout droit ou de planer gracieusement, partent violemment sur le côté (gauche ou droite) dès le début.
+L'Effet "Mouche sur la vitre" : Elles percutent les murs Invisibles (bords de l'écran). Le moteur physique les empêche de sortir, donc elles "frottent" contre le mur.
+La Faille du Système : Le but du jeu est de "toucher le sol le plus tard possible".
+Normalement, on attend d'elles qu'elles planent.
+Mais se coincer dans un coin ou frotter contre un mur freine considérablement la chute (friction).
+Du coup, ces créatures "buggées" survivent plus longtemps que celles qui essaient de voler honnêtement !
+La Sélection : Comme elles survivent longtemps, l'algorithme se dit "Wouaouh, quel pilote !" et les reproduit. À la génération suivante, tu as donc plein de bébés qui ont hérité de cette tendance à foncer dans le mur pour s'y agripper.
+C'est un classique : s
