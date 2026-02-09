@@ -1,0 +1,88 @@
+J’ai fait une IA qui apprend à jouer à Geometry Dash, puis je lui ai créé un niveau difficile pour la tester un peu.
+Bon, reprenons du début.
+
+Pour faire une IA qui joue à Geometry Dash, il faut commencer par avoir Geometry Dash. Logique. Donc je vais devoir refaire tout le jeu en partant de zéro.
+
+Je commence par créer un espace dans lequel on peut placer des blocs, ainsi qu’une caméra qu’on peut déplacer. Ensuite, je rajoute un magnifique carré rouge qui servira de joueur et je le fais glisser vers la droite.
+Maintenant, je peux ajouter de la gravité, une interaction entre le carré et le sol, et enfin un bouton de saut.
+
+Pour faire les choses avec précision, on peut même aller vérifier sur Internet la vitesse et la longueur des sauts dans le vrai jeu, histoire que ça y ressemble au maximum. Je rends l’apparence du joueur un peu plus propre et j’ajoute la petite rotation du carré quand il est en l’air.
+
+Maintenant, il nous faut les pics qui servent d’obstacles. On fait donc des petits triangles orientables, on les place sur le terrain… et voilà.
+On ajoute aussi la collision.
+
+Il ne nous reste plus qu’à créer un terrain, et ça y est : essentiellement, on a un jeu qui fonctionne.
+
+Cependant, si vous avez l’œil, vous avez peut-être remarqué que… c’est moche.
+Dans ce genre de cas, je vous recommande ma méthode de professionnel : rajouter des effets visuels inutiles jusqu’à ce qu’on y croie un peu plus.
+
+Donc, dans l’ordre : on fait briller le joueur, on ajoute des particules, une petite traînée, un ciel en dégradé, et on fait varier la couleur des blocs pour donner un peu de relief.
+Et voilà, on a notre œuvre d’art. Création du jeu terminée.
+
+On passe à la partie intéressante : l’IA qui va jouer au jeu.
+
+Il faut commencer par décider à quoi va ressembler le cerveau de cette IA et comment il va être structuré. Voilà comment j’ai décidé de faire.
+
+Voici un neurone. Chaque neurone peut être allumé ou éteint en fonction de ce qu’il détecte sur le terrain. Les neurones verts s’allument s’ils sont placés sur la case qui leur correspond. Par exemple, ce neurone vert détecte une pique : s’il est sur une pique, il s’allume, sinon il reste éteint. C’est pareil pour un neurone “bloc” ou un neurone “air”.
+
+Il y a aussi des neurones rouges. Eux fonctionnent à l’inverse : ils sont allumés tout le temps, sauf s’ils sont sur la case qui leur correspond.
+
+On a donc au total six types de neurones. Ce sont les briques de base qui vont constituer notre IA.
+
+On peut connecter plusieurs neurones pour former un réseau. Un réseau ne s’active que si tous ses neurones sont allumés. Par exemple, ce réseau veut deux pics et un bloc à des positions précises : si on les lui donne, il s’active.
+Ou encore ce réseau qui veut un bloc, mais pas de bloc juste au-dessus.
+
+Quand un réseau est activé, le petit cercle blanc au milieu s’allume… et le carré saute.
+
+Regardons ce que ça donne en action. Ici, on a un réseau qui veut deux pics et un bloc. Quand le carré arrive au bon endroit, hop, il saute.
+
+On peut aussi créer un réseau avec un seul neurone. Dans ce cas, dès que ce neurone s’allume, le réseau entier s’active et le joueur saute. Par exemple, ici, le joueur saute à chaque fois qu’il y a un bloc devant lui.
+
+L’IA peut avoir plusieurs réseaux en même temps pour gérer différentes situations. Cet ensemble de réseaux constitue le cerveau de l’IA.
+
+On peut se convaincre que cette architecture est capable de réaliser toutes les fonctions logiques possibles, et donc qu’il existe forcément un cerveau capable de terminer le niveau, à condition d’avoir suffisamment de réseaux et de neurones.
+
+Il reste maintenant à déterminer comment trouver un bon cerveau.
+On pourrait placer les neurones manuellement, tester, corriger, recommencer… mais on ne va pas faire ça pour deux raisons.
+La première, c’est que ce serait long, fastidieux, et plein d’erreurs.
+La deuxième, c’est que vous avez cliqué sur cette vidéo pour voir de l’évolution et du machine learning.
+
+Voilà donc le plan : l’IA va générer 1000 cerveaux aléatoires, les tester sur le jeu et garder le meilleur. Ensuite, elle va créer 1000 variantes de ce cerveau, les tester, garder la meilleure, et recommencer encore et encore.
+Après quelques dizaines de générations, on devrait obtenir quelque chose de performant.
+
+Normalement, vous avez tout compris. On peut lancer la simulation.
+
+On commence à la génération zéro avec nos 1000 essais aléatoires. Évidemment, l’IA est très mauvaise au début. La plupart des essais sautent soit tout le temps, soit jamais.
+C’est normal : l’IA n’a pas encore appris à placer ses neurones aux bons endroits pour détecter les obstacles. Elle les met donc souvent dans le ciel ou dans le sol, où il ne se passe rien. Résultat : un comportement constant et inefficace.
+
+Presque toute la première génération est catastrophique… jusqu’à l’essai numéro 975. Par pur hasard, l’IA génère un cerveau qui saute s’il y a soit une pique, soit un bloc juste devant. Grâce à ça, le carré parcourt presque 60 blocs. C’est de loin le meilleur essai de la génération zéro.
+
+C’est donc cet heureux élu qui va engendrer toute la génération suivante.
+
+À partir de là, je vais arrêter de commenter et vous laisser sur ce que vous attendez tous : un petit montage de la progression.
+
+À la génération 132, notre petit carré a bien progressé, mais il reste bloqué à un moment. Puis, à la génération 323…
+
+Incroyable. Notre ami le carré a réussi à terminer le niveau. Quel talent.
+
+Regardons maintenant de plus près comment il a fait. Son cerveau est composé de quatre réseaux, qu’on va décortiquer un par un.
+
+Le premier est un réseau à un seul neurone : il fait sauter le carré s’il y a une pique juste devant. Rien de très mystérieux.
+
+Le deuxième réseau sert aux sauts de longue distance entre de petites plateformes. Il vérifie qu’il y a bien du vide devant le carré et utilise des neurones placés plus loin pour ajuster précisément la position de la plateforme d’atterrissage.
+
+Le troisième réseau gère les sauts vers des plateformes plus hautes. Il sert à monter sur un rebord, à sauter par-dessus un trou ou à viser une plateforme fine. Il contient aussi des neurones rouges pour éviter de sauter quand il y a une pique juste au-dessus ou pour attendre le bon moment avant de franchir certains obstacles.
+
+Enfin, le quatrième et dernier réseau est clairement le plus stupide. Il gère une situation ultra spécifique qui n’apparaît qu’une seule fois dans le niveau. C’est du pur apprentissage par cœur. Sur un autre niveau, ce réseau serait probablement remplacé par quelque chose de plus logique.
+
+Bref, vous comprenez maintenant comment fonctionne le cerveau qui a permis à l’IA de terminer le niveau.
+
+Dans tous les cas, bravo à elle. Je suis très fier.
+C’est la fin de cette vidéo. Likez et commentez, et peut-être que je ferai un épisode 2 où j’ajouterai des éléments du jeu original et où je pousserai l’apprentissage beaucoup plus loin.
+
+Parce que oui, je vous ai un peu arnaqués avec le montage dramatique : l’ordinateur simule plus de 100 générations par seconde, et tout l’apprentissage a en réalité pris moins de trois secondes.
+
+Il y a donc moyen d’aller beaucoup plus loin.
+Sur cette chaîne, je publierai aussi des petits programmes que je développe. Je pense que ça va vous plaire.
+
+Bref, ciao.

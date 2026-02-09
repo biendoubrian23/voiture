@@ -1,0 +1,99 @@
+Jouer à Tetris, c’est cool. Mais vous savez ce qui est encore mieux ? Jouer à Tetris parfaitement.
+
+Applaudissements.
+Musique.
+
+Eh ben, l’introduction claque.
+Le défi d’aujourd’hui, ça va être de créer un robot invincible à Tetris. On va voir si on y arrive.
+
+Tout d’abord, il va falloir recréer le jeu. Et vu qu’il existe mille versions de Tetris, j’ai décidé de choisir celle-ci : c’est la première qui sort quand on tape “frites et riz” sur Google. Maintenant qu’on sait ce qu’on a à faire, on peut y aller.
+
+Je commence par créer une fenêtre et choisir une couleur de fond. Ensuite, je fais un plateau avec des petits carrés dedans et je l’affiche à l’écran. Maintenant, on va essayer de rendre l’interface un peu plus sexy. J’ai trouvé cette image sur internet et on va essayer de faire à peu près pareil.
+
+Et voilà. Si ce n’est pas magnifique… L’affichage est bon, on peut rajouter les pièces qui tombent.
+
+Bon, là vous n’êtes pas encore impressionnés, mais regardez plutôt ça.
+
+Musique.
+
+Incroyable, n’est-ce pas ? Ça rigole moins.
+Je rajoute les autres pièces, et maintenant on veut pouvoir les contrôler.
+
+Le fonctionnement est assez simple : quand le joueur veut faire un mouvement avec la pièce — la bouger ou la tourner — je regarde si ça crée une collision. Si ce n’est pas le cas, le mouvement est autorisé. Sinon, il ne se passe rien.
+Seule exception : le mouvement vers le bas. Si ça crée une collision, non seulement la pièce ne bouge pas, mais elle est fixée en place et on fait apparaître la pièce suivante.
+
+Modifier la position d’une pièce est simple : il suffit de changer ses coordonnées. En revanche, pour faire des rotations, c’est un peu plus compliqué. Il existe plusieurs méthodes, mais j’ai choisi la plus simple : définir manuellement les différentes rotations possibles de chaque pièce et demander au jeu d’alterner entre elles.
+
+En théorie, ça veut dire qu’on peut faire n’importe quoi à la place d’une rotation. Par exemple, à tout moment, tu veux tourner la pièce jaune et, à la place… paf.
+
+Ok, mais il nous manque encore la mécanique principale de Tetris : les lignes qui disparaissent quand elles sont complètes. Je rajoute donc ça et… magnifique. On a un vrai jeu.
+
+Je rajoute quand même la prévisualisation de la pièce suivante.
+Musique.
+
+Puis l’affichage du score. Pour ceux qui se demandent, j’ai utilisé ces règles de scoring simplement parce que ce sont celles du jeu que j’aurais fait. Et voilà, notre jeu est terminé. Vous savez donc ce qu’on va faire maintenant.
+
+On va programmer un robot ultra performant qui va jouer à notre place.
+
+Il y a essentiellement deux tâches importantes pour bien jouer à Tetris, et qui peuvent poser problème à un humain :
+
+trouver un bon endroit où placer la pièce
+
+appuyer sur les bons boutons au bon moment
+
+Pour un programme, appuyer sur une touche au bon moment est trivial. On va donc surtout s’intéresser à comment lui permettre de bien choisir où placer la pièce.
+
+Voilà ce qu’on va faire : on va demander au programme de dresser la liste de toutes les positions possibles pour la pièce, puis d’attribuer une valeur — une sorte de note — à chaque plateau correspondant, et enfin de choisir le meilleur.
+
+Il faut donc d’abord construire cette liste de positions possibles. Une première idée serait, pour chaque rotation de la pièce, de la placer dans chaque colonne et de la laisser tomber jusqu’à l’endroit où elle s’arrête. En faisant ça pour toutes les combinaisons, on obtient une liste de positions d’arrivée.
+
+Mais il y a un problème : on rate beaucoup de positions, notamment celles qu’on peut atteindre en se glissant sous des barrières. Il faut donc ruser pour inclure aussi ces positions-là.
+
+Ce qu’on va faire, c’est commencer par ajouter à notre liste toutes les positions à l’air libre, c’est-à-dire celles où la pièce n’a aucun bloc au-dessus d’elle. Ensuite, on va chercher s’il existe des endroits couverts où la pièce pourrait rentrer, et vérifier si on peut la ramener à l’air libre par une suite de mouvements.
+
+Par exemple, ici, avec deux mouvements, on peut sortir cette pièce et l’amener à l’air libre : il faut donc inclure cette position dans la liste. En revanche, pour celles-ci, peu importe comment on les bouge, on n’arrivera jamais à les sortir : il ne faut donc pas les inclure.
+
+J’appelle cette méthode comme ça, et vous voyez qu’elle permet effectivement d’obtenir une liste complète de toutes les positions possibles.
+
+Il ne reste plus qu’à faire en sorte que l’ordinateur appuie sur les bonnes touches au bon moment pour amener la pièce à l’endroit voulu. Et voilà : on peut atteindre n’importe quelle position.
+
+Il nous reste maintenant à trouver un système d’évaluation pour décider quelle position est bonne et laquelle est mauvaise. C’est la partie la plus intéressante.
+
+J’ai commencé par le plus simple possible : considérer uniquement la hauteur des blocs. On fait la somme des hauteurs de chaque colonne, et ça nous donne la valeur d’un plateau. On choisit ensuite celui avec la valeur la plus basse. Ça paraît logique, puisque le but de Tetris est d’éviter que les blocs s’empilent trop haut.
+
+Voyons ce que ça donne.
+
+Bon… pas génial. Ça ressemble à un humain très nul.
+La raison principale, c’est que prendre uniquement la hauteur en compte crée beaucoup de trous, c’est-à-dire des espaces vides avec des blocs au-dessus. Et ces trous empêchent le robot de compléter des lignes.
+
+Regardez par exemple comment il place cette barre. Il fait exactement ce qu’on lui a demandé : il la met à plat pour éviter de créer trop de hauteur. C’est effectivement la position où la somme des hauteurs est la plus basse, mais en tant qu’humains, on voit bien que c’est un très mauvais coup.
+
+On voudrait plutôt qu’il la mette ici, contre le bord, même si la somme des hauteurs est plus élevée. On va donc rajouter ça à notre évaluation : à partir de maintenant, si un plateau contient des trous, il est considéré comme très mauvais.
+
+Musique.
+
+Et là, c’est déjà clairement mieux.
+Mais il perd quand même parfois. On remarque qu’il crée des colonnes vides qu’il refuse de remplir par peur de créer des trous.
+
+On ajoute donc un nouvel élément à l’évaluation : le plateau doit être le plus plat et le plus équilibré possible.
+
+On pourrait continuer à ajouter des règles encore et encore, mais on va faire quelque chose de plus intelligent. L’ordinateur ne connaît pas seulement la pièce actuelle : il connaît aussi la suivante.
+
+Au lieu d’évaluer directement les plateaux possibles, on va, pour chacun d’eux, générer la liste des plateaux suivants possibles avec la prochaine pièce. On évalue ces plateaux, on garde le meilleur, et on utilise sa note comme évaluation du plateau d’origine.
+
+On fait ça pour chaque position possible et on choisit celle qui obtient la meilleure note finale.
+
+Grâce à ça, le robot accepte parfois de créer des trous, s’il sait qu’il pourra les combler avec la pièce suivante. Par exemple ici, ça ne le dérange pas de créer plein de trous avec cette barre, parce qu’il sait qu’il pourra les supprimer juste après.
+
+Avec cette amélioration, le robot commence à anticiper et à faire des coups vraiment très bons. Par exemple ici, ce coup peut paraître bizarre, mais il sait que juste après…
+
+Et là, je me suis rendu compte que j’étais en train de pleurer d’admiration.
+
+Avec cette amélioration, le robot devient très performant. C’est donc l’heure de voir jusqu’où il peut aller. Je passe directement en accéléré, parce que je sens que ça va durer longtemps.
+
+Musique.
+
+Je l’ai laissé tourner, et là on est à un score de 50 000. Peut-être que si on continuait, il finirait par perdre, mais comme je n’ai pas la patience de tester, on va juste dire qu’il est invincible. Voilà, certifié 100 % invincible, je vous le promets. Faites-moi confiance.
+
+Défi relevé. Laissez passer. Ciao.
+Le 31 mars, je vous dirai tout sur l’arnaque du siècle.

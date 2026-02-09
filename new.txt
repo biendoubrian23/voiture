@@ -1,0 +1,5 @@
+ Résumé : par où commencer ?
+Augmente POPULATION_SIZE à 50 - Plus d'individus = plus de chances de trouver une bonne solution
+Change la topologie à [5, 8, 6, 2] - Plus de neurones pour des décisions plus nuancées
+Augmente ELITISM_COUNT à 4 - Garde plus de bons individus entre générations
+Ajoute 2 capteurs - Meilleure perception latérale
