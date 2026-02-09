@@ -14,6 +14,9 @@ export class EvolutionManager {
     maxDuration: number = 800;
     isRunning: boolean = false;
 
+    // Stats
+    avgEnergy: number = 100;
+
     constructor(engine: PhysicsEngine) {
         this.engine = engine;
     }
@@ -47,17 +50,17 @@ export class EvolutionManager {
 
         // Spawn all creatures at top
         const startX = this.engine.width / 2;
-        const startY = 100; // Give them space
+        const startY = 100;
 
         this.population.forEach((creature, index) => {
             creature.fitness = 0;
-            creature.isDead = false; // RESET DEAD STATUS
+            creature.isDead = false;
+            creature.energy = 80 + Math.random() * 40; // Variation in initial energy? No, standard.
+            creature.energy = 100;
 
-            // Random spread but centered
             const spawnX = startX + (Math.random() - 0.5) * 600;
             const spawnY = startY + (Math.random() - 0.5) * 50;
 
-            // Spawn
             const points = creature.spawn(this.engine, spawnX, spawnY);
             (creature as any).runtimePoints = points;
         });
@@ -70,12 +73,16 @@ export class EvolutionManager {
 
         let allDead = true;
         let activeCount = 0;
+        let totalEnergy = 0;
 
         this.population.forEach(c => {
+            // PROCESS BIOLOGY (Energy, Muscles)
+            c.tick(this.engine);
+            totalEnergy += c.energy;
+
             if (c.isDead) return;
 
             const points = (c as any).runtimePoints as Point[];
-            // Safety Check
             if (!points || points.length === 0) {
                 c.isDead = true;
                 return;
@@ -86,19 +93,13 @@ export class EvolutionManager {
 
             points.forEach(p => {
                 if (p.y > maxY) maxY = p.y;
-
-                // WALL PENALTY CHECK
-                if (p.x <= 0 || p.x >= this.engine.width) {
-                    hitWall = true;
-                }
+                if (p.x <= 0 || p.x >= this.engine.width) hitWall = true;
             });
 
             if (hitWall) {
-                // INSTANT DEATH
                 c.isDead = true;
                 c.fitness = Math.max(0, this.timer - 50);
             } else if (maxY >= this.engine.height - 10) {
-                // Ground Hit
                 c.isDead = true;
                 if (c.fitness === 0) c.fitness = this.timer;
             } else {
@@ -107,6 +108,8 @@ export class EvolutionManager {
                 c.fitness = this.timer;
             }
         });
+
+        this.avgEnergy = totalEnergy / this.popSize;
 
         if (allDead || this.timer >= this.maxDuration) {
             this.nextGeneration();
@@ -121,25 +124,22 @@ export class EvolutionManager {
             this.globalBestFitness = best.fitness;
         }
 
-        console.log(`Generation ${this.generation} Complete. Best Time: ${best.fitness}. Survivors Copied: 10`);
+        console.log(`Generation ${this.generation} Complete. Best: ${best.fitness}. Avg Energy: ${this.avgEnergy.toFixed(1)}`);
 
         const newPop: Creature[] = [];
 
-        // ELITISM: Keep Top 10 (10% of 100)
-        // These are the "Rewarded" parents who survive unchanged.
+        // ELITISM (Top 10%)
         for (let i = 0; i < 10; i++) {
             const elite = new Creature(JSON.parse(JSON.stringify(this.population[i].dna)));
             newPop.push(elite);
         }
 
-        // REPRODUCTION: Fill the rest (90)
-        // Parents are chosen via Tournament from the old population.
-        // Better fitness = Higher chance to be picked.
+        // REPRODUCTION
         while (newPop.length < this.popSize) {
             const parent = this.tournamentSelect();
             const childDNA = JSON.parse(JSON.stringify(parent.dna));
             const child = new Creature(childDNA);
-            child.mutate(0.1);
+            child.mutate(0.15); // Slightly higher mutation to find efficient forms
             newPop.push(child);
         }
 
@@ -149,7 +149,6 @@ export class EvolutionManager {
     }
 
     tournamentSelect(): Creature {
-        // High pressure: pick 6 random, take best.
         const size = 6;
         let best: Creature | null = null;
         for (let i = 0; i < size; i++) {

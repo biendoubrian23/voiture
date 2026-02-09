@@ -17,20 +17,17 @@ export default function BirdSimulationPage() {
     const [gen, setGen] = useState(0);
     const [bestFit, setBestFit] = useState(0);
     const [popSize, setPopSize] = useState(0);
-    const evoRef = useRef<EvolutionManager | null>(null); // Ref to access inside closures if needed
+    const [avgEnergy, setAvgEnergy] = useState(100);
+    const evoRef = useRef<EvolutionManager | null>(null);
 
     useEffect(() => {
         const newEngine = new PhysicsEngine(800, 500);
-        // Start with a single point falling
         newEngine.addPoint(400, 100);
         setEngine(newEngine);
     }, []);
 
-    // Update engine air density when state changes
     useEffect(() => {
-        if (engine) {
-            engine.airDensity = airDensity;
-        }
+        if (engine) engine.airDensity = airDensity;
     }, [airDensity, engine]);
 
     const resetSimulation = (newMode: 'point' | 'line' | 'triangle' | 'box' | 'muscle' | 'creature' | 'air' | 'evolution') => {
@@ -38,9 +35,8 @@ export default function BirdSimulationPage() {
         setMode(newMode);
         engine.reset();
         engine.airDensity = airDensity;
-        setSimSpeed(1); // Reset speed on mode change
+        setSimSpeed(1);
 
-        // Stop evolution if we switch away (or restart it)
         if (evoRef.current) {
             evoRef.current.stopEvolution();
             setEvoManager(null);
@@ -74,12 +70,10 @@ export default function BirdSimulationPage() {
             engine.addStick(p4, p1);
             engine.addStick(p1, p3);
         } else if (newMode === 'muscle') {
-            const p1 = engine.addPoint(cx - 50, cy, true); // Pinned
+            const p1 = engine.addPoint(cx - 50, cy, true);
             const p2 = engine.addPoint(cx + 50, cy);
-            // Add a muscle
             const m = engine.addStick(p1, p2, true);
             m.frequency = 0.1;
-            // Add a weight at the end
             engine.addPoint(cx + 50, cy + 50).pinned = false;
         } else if (newMode === 'creature') {
             const p1 = engine.addPoint(cx, cy);
@@ -115,6 +109,7 @@ export default function BirdSimulationPage() {
             if (evoRef.current.timer % 10 === 0) {
                 setGen(evoRef.current.generation);
                 setBestFit(Math.floor(evoRef.current.globalBestFitness));
+                setAvgEnergy(Math.floor(evoRef.current.avgEnergy));
             }
         }
     };
@@ -132,7 +127,6 @@ export default function BirdSimulationPage() {
 
             <main className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
 
-                {/* Control Panel */}
                 <div className="md:col-span-1 space-y-6">
                     <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 shadow-lg">
                         <h3 className="text-xl font-bold mb-4 text-emerald-400">Controls</h3>
@@ -150,7 +144,6 @@ export default function BirdSimulationPage() {
                             <button onClick={() => resetSimulation('evolution')} className={`w-full p-3 rounded-lg font-bold transition-all ${mode === 'evolution' ? 'bg-orange-500 text-white' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}>8. EVOLUTION (Gliders)</button>
                         </div>
 
-                        {/* Speed Controls */}
                         {mode === 'evolution' && (
                             <div className="mt-6 pt-4 border-t border-neutral-800">
                                 <h4 className="text-xs font-bold text-neutral-500 mb-2 uppercase tracking-wide">Simulation Speed</h4>
@@ -168,7 +161,6 @@ export default function BirdSimulationPage() {
                             </div>
                         )}
 
-                        {/* Air Settings */}
                         <div className="mt-6 pt-4 border-t border-neutral-800 space-y-4">
                             <div className="flex items-center justify-between">
                                 <h4 className="text-xs font-bold text-neutral-500 uppercase tracking-wide">Aerodynamics</h4>
@@ -178,7 +170,6 @@ export default function BirdSimulationPage() {
                                     </button>
                                 </div>
                             </div>
-
                             <div className="space-y-1">
                                 <div className="flex justify-between text-xs">
                                     <label className="text-neutral-400">Air Density</label>
@@ -197,10 +188,22 @@ export default function BirdSimulationPage() {
                                         <p className="text-lg font-bold text-white">{bestFit}</p>
                                         <p className="text-xs text-neutral-500">BEST TIME (Frames)</p>
                                     </div>
-                                    <div>
+                                    <div className="mb-2">
                                         <p className="text-sm font-bold text-emerald-400">Survivors: 10 / {popSize || 100}</p>
-                                        <p className="text-xs text-neutral-600 italic mt-2">"Only the best spread their genes."</p>
                                     </div>
+                                    <div className="bg-neutral-800 rounded p-2">
+                                        <div className="flex justify-between text-xs mb-1">
+                                            <span className={avgEnergy < 20 ? 'text-red-500 font-bold' : 'text-neutral-400'}>AVG ENERGY</span>
+                                            <span className="text-white">{avgEnergy}%</span>
+                                        </div>
+                                        <div className="w-full bg-neutral-700 h-2 rounded-full overflow-hidden">
+                                            <div
+                                                className={`h-full transition-all duration-300 ${avgEnergy < 30 ? 'bg-red-500' : (avgEnergy < 60 ? 'bg-yellow-500' : 'bg-green-500')}`}
+                                                style={{ width: `${avgEnergy}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-neutral-600 italic mt-4">"Efficiency is key."</p>
                                 </div>
                             ) : (
                                 <p className="text-xs text-neutral-500 italic font-mono">
@@ -211,7 +214,6 @@ export default function BirdSimulationPage() {
                     </div>
                 </div>
 
-                {/* Simulation Display */}
                 <div className="md:col-span-2">
                     {engine && (
                         <SimulationViewer
