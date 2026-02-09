@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏎️ Next.js AI Car Simulation
 
-## Getting Started
+Une simulation de voitures autonomes qui apprennent à conduire grâce à un **Réseau de Neurones** et un **Algorithme Génétique**.
 
-First, run the development server:
+![Simulation Preview](https://github.com/biendoubrian23/voiture/assets/preview.png)
 
+## 🚀 Fonctionnalités
+
+- **🧠 Réseau de Neurones** : Chaque voiture possède son propre "cerveau" (Perceptron Multi-Couches).
+- **🧬 Algorithme Génétique** : Sélection naturelle, croisement et mutation pour faire évoluer les voitures.
+- **🎨 Éditeur de Circuit** : Dessinez vos propres circuits et testez l'IA dessus.
+- **💾 Save/Load** : Sauvegardez les meilleurs "cerveaux" et chargez-les sur de nouveaux circuits pour tester leur capacité de généralisation.
+- **⚡ Vitesse Variable** : Accélérez la simulation jusqu'à x50.
+
+## 🛠️ Stack Technique
+
+- **Framework** : Next.js 15 (App Router)
+- **Langage** : TypeScript
+- **Style** : Tailwind CSS
+- **Rendu** : HTML5 Canvas
+
+## 🏁 Comment lancer le projet
+
+1. Cloner le repo :
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/biendoubrian23/voiture.git
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Installer les dépendances :
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Lancer le serveur de développement :
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Ouvrir [http://localhost:3000](http://localhost:3000)
 
-## Learn More
+## 🎮 Comment ça marche ?
 
-To learn more about Next.js, take a look at the following resources:
+1. Au début, les voitures ont des cerveaux aléatoires. Elles se crashent.
+2. L'algorithme sélectionne les voitures qui sont allées le plus loin.
+3. Il crée une nouvelle génération basée sur ces championnes (avec des mutations).
+4. Répétez jusqu'à ce que l'IA devienne une pilote experte !
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+*Créé pour une vidéo YouTube sur l'Intelligence Artificielle.*
