@@ -1,0 +1,47 @@
+Simulateur d'évolution des oiseaux - Tâches du projet
+
+Phase 1 : Le squelette (Moteur physique)
+
+Créer une nouvelle page Next.js : /bird-simulation
+
+Implémenter un moteur physique basique (Points et intégration de Verlet)
+
+Implémenter les contraintes (Contraintes de distance / Os)
+
+Rapport 1 : « J'ai créé des points et des bâtonnets.» (Bases de la physique)
+
+Phase 2 : Muscles et mouvements
+
+Implémenter la contraction musculaire (contraintes de longueur variable)
+
+Créer une horloge/un oscillateur interne pour le contrôle musculaire
+
+Rapport 2 : « Ça bouge ! Mais c'est idiot.» (Logique des muscles)
+
+Phase 3 : L'air (Aérodynamique)
+
+Implémenter les forces de portance et de traînée sur les membres
+
+Visualisation des forces (optionnel, mais utile pour la vidéo)
+
+Rapport 3 : « Pourquoi ils ne tombent pas simplement. » (Aérodynamique simplifiée)
+
+Phase 4 : Algorithme génétique
+
+Définition du génome (muscles, fréquences, phases)
+
+Création d’une population d’individus aléatoires
+
+Implémentation de la sélection (fonction d’évaluation : distance/taille)
+
+Implémentation du croisement et de la mutation
+
+Rapport 4 : « Sélection naturelle… à la recherche des individus les plus intelligents »
+
+Phase 5 : Boucle de simulation et visualisation
+
+Création de la boucle de simulation principale (multithread ou optimisée)
+
+Interface utilisateur pour le contrôle de la vitesse de simulation et l’affichage des statistiques
+
+Rapport 5 : « Résultat final » (Présentation)

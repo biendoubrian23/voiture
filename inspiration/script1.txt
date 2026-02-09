@@ -1,0 +1,133 @@
+Script Vidéo : "J'ai appris à une IA à Voler (et c'était le chaos)"
+Durée estimée : 13-15 minutes Ton : Éducatif, Humour tech (style Code Bullet / Sebastian Lague / Poisson Fécond), Rythmé.
+
+Intro : Le Rêve d'Icare (0:00 - 1:30)
+(Visuel : Noir complet. Bruit de vent violent. Soudain, un "SPLATCH" bruyant.)
+
+(Visuel : Ta tête face caméra, ou ton avatar, avec un air désespéré.)
+
+Narrateur : "Ça, c'était le bruit de ma 400ème génération d'oiseaux artificiels qui s'écrase lamentablement au sol."
+
+(Visuel : Montage rapide de trucs qui tombent : tartines, chats, et tes premières simulations ratées.)
+
+Narrateur : "Salut tout le monde. La dernière fois, on a joué avec des poissons. C'était cool, l'eau ça porte, c'est sympa, ça pardonne. Mais aujourd'hui... aujourd'hui on s'attaque à l'ennemi juré de tout programmeur physique : La Gravité."
+
+(Visuel : Formule de Newton qui apparaît et écrase un petit bonhomme bâton.)
+
+Narrateur : "Le but est simple : Créer une vie artificielle, lui donner des muscles, et attendre que l'Évolution fasse son travail pour qu'elle apprenne à voler. Spoiler : La nature a mis des millions d'années. Moi j'ai un week-end et un PC portable qui chauffe trop."
+
+Chapitre 1 : Créer la Matière (1:30 - 3:30)
+(Visuel : Écran noir avec un seul point blanc au milieu.)
+
+Narrateur : "Tout commence avec un point. En programmation, un point c'est juste deux chiffres : X et Y. Sa position."
+
+(Visuel : Le point tombe vers le bas de l'écran.)
+
+Narrateur : "Si on ajoute une vitesse verticale qui augmente à chaque instant, félicitations, vous avez réinventé la chute libre. Mais un point tout seul, c'est triste."
+
+(Visuel : Deux points apparaissent. Une ligne se dessine entre eux.)
+
+Narrateur : "Alors on en met deux, et on les relie. C'est là que ça devient drôle. Comment on dit à un ordinateur 'ces deux points sont attachés par un bâton solide' ?"
+
+(Visuel : Schéma animé. Deux points s'éloignent, une flèche rouge apparaît pour les ramener, comme un élastique.)
+
+Narrateur : "C'est une contrainte de distance. Si les points sont trop loin, on les rapproche. S'ils sont trop près, on les écarte. Si on fait ça 60 fois par seconde, on obtient... un bâton."
+
+(Visuel : Tu construis un triangle, puis un carré avec une diagonale sur ton simulateur.)
+
+Narrateur : "En reliant plusieurs bâtons, on peut créer des formes. Des triangles, des carrés... C'est la base de tout moteur physique. C'est rigide, ça rebondit, c'est solide."
+
+(Visuel : Image d'un bonhomme en bâtons qui tombe dans des escaliers, style "Ragdoll".)
+
+Chapitre 2 : Donner la Vie (Les Muscles) (3:30 - 6:00)
+(Visuel : Ta créature inerte au sol.)
+
+Narrateur : "Le problème, c'est que pour l'instant, c'est juste un cadavre géométrique. Pour voler, il faut bouger. Il faut des muscles."
+
+(Visuel : Zoom sur un des "bâtons" de la créature. Il change de couleur (devient rouge) et rétrécit.)
+
+Narrateur : "Dans notre monde, un muscle, c'est un truc qui se contracte. Dans mon code, c'est pareil. Je dis au bâton : 'Maintenant, tu changes de longueur'."
+
+(Visuel : Graphique d'une onde sinusoïdale (Sinus) qui ondule.)
+
+Narrateur : "Mais comment la créature sait QUAND contracter ses muscles ? Elle n'a pas de cerveau pour l'instant. Alors on va lui donner une horloge interne. Un rythme. Comme un cœur qui bat."
+
+(Visuel : La créature commence à convulser sur le sol de manière rythmique mais inutile.)
+
+Narrateur : "En associant chaque muscle à cette horloge, la créature peut commencer à bouger de manière cyclique. C'est... prometteur ? Non, en fait ça ressemble surtout à une crise d'épilepsie géométrique."
+
+(Visuel : La créature se secoue frénétiquement mais n'avance pas.)
+
+Narrateur : "Pour l'instant, elle gigote. Mais elle ne vole pas. Pour voler, il nous manque l'ingrédient secret."
+
+Chapitre 3 : L'Air (L'Enfer de l'Aérodynamisme) (6:00 - 9:00)
+(Visuel : Toi qui sors la main par la fenêtre d'une voiture (filmé réel ou stock footage).)
+
+Narrateur : "Vous avez déjà fait ça en voiture ? Sortir la main par la fenêtre. Si vous mettez la main à plat, ça coupe le vent. Si vous l'inclinez un peu... Hop ! Votre main est poussée vers le haut."
+
+(Visuel : Schéma physique simple sur le dessin de la main. Flèche bleue (Vent), Flèche verte (Portance/Lift), Flèche rouge (Traînée/Drag).)
+
+Narrateur : "C'est ça le secret du vol. Deux forces : La Traînée (le vent qui te freine) et la Portance (la magie qui te fait monter). C'est ce qu'on appelle l'aérodynamisme."
+
+(Visuel : Retour au simulateur. On voit des lignes représentant le vent frapper les bâtons de la créature.)
+
+Narrateur : "J'ai dû coder ça. Chaque bâton de ma créature agit maintenant comme une petite aile. S'il est plat, il fend l'air. S'il est incliné, il génère de la force."
+
+(Visuel : Une créature simple (juste une barre) qui plane doucement au lieu de tomber comme une pierre.)
+
+Narrateur : "Regardez ça ! Ça ne tombe plus tout droit ! Ça plane ! Enfin... ça tombe avec style, comme dirait Buzz l'Éclair."
+
+Chapitre 4 : La Sélection Naturelle (Le Grand Filtre) (9:00 - 12:00)
+(Visuel : Une armée de 1000 créatures aléatoires (des amas de points et de traits) qui apparaissent en haut de l'écran.)
+
+Narrateur : "Maintenant qu'on a la physique, on a besoin d'ingénieurs pour dessiner l'oiseau parfait. Mais je suis un programmeur paresseux. Alors on va laisser faire le hasard."
+
+(Visuel : Les 1000 créatures tombent. 99% s'écrasent directement. Certaines tourbillonnent.)
+
+Narrateur : "Voici la Génération 0. C'est le chaos absolu. Certaines n'ont même pas d'ailes. D'autres sont juste... des briques."
+
+(Visuel : Une créature isolée qui fait n'importe quoi. Zoom dessus avec une musique triste de flûte à bec.)
+
+Narrateur : "Lui, je l'ai appelé Kévin. Kévin n'a aucune chance."
+
+(Visuel : Un compteur "Génération : 1". Puis "Génération : 10". Puis "Génération : 50" qui défile rapidement.)
+
+Narrateur : "L'algorithme est simple : On lance 1000 créatures. On regarde celle qui va le plus loin vers la droite. On tue toutes les autres (désolé Kévin). On prend la championne, on la clone, et on modifie un tout petit peu ses muscles ou sa forme (mutation). Et on recommence."
+
+(Visuel : Comparaison côte à côte. Génération 0 (Chute libre) vs Génération 20 (Parachutisme maladroit) vs Génération 50 (Planeur).)
+
+Narrateur : "Au début, l'évolution trouve des parachutes. C'est logique : pour rester en l'air, il faut tomber lentement. Mais parachuter, ce n'est pas voler."
+
+(Visuel : Un changement de comportement soudain vers la génération 80. Une créature commence à BATTRE des ailes.)
+
+Narrateur : "Et là... vers la génération 80... le miracle."
+
+Chapitre 5 : Le Résultat Final (12:00 - 14:00)
+(Visuel : Musique épique qui monte crescendo. Montage cinématique des meilleures créatures.)
+
+Narrateur : "L'évolution a compris. Elle a compris qu'en contractant ses membres de manière cyclique, elle peut créer sa propre portance. Elle n'a plus besoin de juste tomber."
+
+(Visuel : Une créature complexe, ressemblant vaguement à un oiseau ou une chauve-souris, qui bat des ailes gracieusement et remonte dans les airs.)
+
+Narrateur : "Regardez-moi ça. C'est parti de rien. De points aléatoires. Et maintenant, ça vole. Ça lutte contre la gravité et ça gagne."
+
+(Visuel : La créature continue de voler vers l'infini à droite de l'écran.)
+
+Narrateur : "Bon, par contre elle ne sait pas atterrir. Mais c'est un problème pour la prochaine vidéo."
+
+Outro (14:00 - 15:00)
+(Visuel : Retour face caméra.)
+
+Narrateur : "C'est fascinant de voir comment des règles simples (gravité, muscles, vent) peuvent créer des comportements aussi complexes. On n'a jamais dit à l'ordinateur 'fait un oiseau'. On lui a juste dit 'ne t'écrase pas'."
+
+(Visuel : Bouton s'abonner qui se fait cliquer par une créature virtuelle.)
+
+Narrateur : "Si vous avez aimé voir Kévin s'écraser pour la science, laissez un pouce bleu. Dites-moi en commentaire si je devrais ajouter des prédateurs ou des canons antiaériens pour la prochaine fois."
+
+Narrateur : "À plus !"
+
+(Visuel : Écran noir. Bruit de vent.)
+
+
+Comment
+Ctrl+Alt+M

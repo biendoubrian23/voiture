@@ -1,0 +1,90 @@
+J’ai programmé des créatures aquatiques.
+Elles ont évolué.
+
+Bon, aujourd’hui, alors que la planète entière attend une vidéo sur Mario… ouais, mais c’est pas toi qui décides. On va programmer des créatures aquatiques et simuler la sélection naturelle pour voir quelle est la créature optimale pour la nage.
+
+Si vous aimez l’évolution, vous n’allez vraiment pas être déçus. Et si vous n’aimez pas l’évolution, vous êtes certainement un procaryote, et par conséquent vous ne pouvez pas cliquer sur le bouton d’abonnement.
+
+On va donc commencer par programmer le moteur physique et le fonctionnement des créatures. Ensuite, on va créer notre algorithme de sélection naturelle. Et enfin, on va s’émerveiller devant l’évolution de nos créatures.
+C’est parti.
+
+Pour commencer, voici la structure des créatures. Elles sont composées de points qui servent d’articulations, et de liens entre ces points qui servent de membres. Je commence par créer ces points et programmer leur affichage. J’ajoute aussi une caméra qu’on peut déplacer et zoomer, pour suivre les créatures quand elles se déplaceront.
+
+Chaque point a une position et une vitesse. À chaque pas de temps — c’est-à-dire 50 fois par seconde — on ajoute la vitesse à la position pour obtenir du mouvement.
+
+C’est maintenant l’heure de rajouter les liens. Essentiellement, c’est une ligne droite qui relie le centre de deux points. Là, je crois que c’est bon.
+
+Il ne faut pas oublier d’ajouter le comportement des liens à chaque pas de temps. On regarde la distance entre deux points liés et on la compare à la longueur voulue du lien. Si elle est trop grande, on applique une force pour les rapprocher. Et si les points sont trop proches, on fait l’inverse.
+
+Parfait. Regardez comme ça marche bien.
+Dans les tests que vous voyez depuis le début, c’est moi qui décide manuellement de faire bouger les points et les liens. Mais évidemment, ce n’est pas ça qu’on veut. Nous, on veut que la créature puisse bouger toute seule et prendre ses propres décisions.
+
+Alors comment ça va marcher ? À chaque pas de temps, la créature pourra appliquer des forces sur ses points. En particulier, quand deux points sont attachés au même point, comme ici, la créature doit pouvoir les rapprocher, un peu comme quand on contracte un biceps pour rapprocher le poignet de l’épaule.
+
+Sauf que si on applique juste deux forces comme ça, il se passe ça.
+
+La base en physique, c’est qu’une créature seule ne devrait pas pouvoir se déplacer dans le vide. On doit donc ajouter une force opposée à chaque force appliquée, pour garantir que la créature reste en place lorsqu’elle se contracte. C’est ce qu’on appelle la première loi de Newton, quand on a très envie d’avoir l’air intelligent.
+
+Vous voyez, là la créature reste en place quand elle se contracte. C’est parfait.
+
+On donne donc aux créatures la possibilité de se contracter à chaque articulation. Il reste maintenant à déterminer comment la créature va décider quand se contracter ou non.
+
+J’ai fait au plus simple : chaque créature a une sorte d’horloge interne qui tourne, par exemple une fois toutes les deux secondes, et une liste de positions qu’elle va essayer d’atteindre en fonction de l’état de cette horloge. Chaque créature peut avoir une vitesse d’horloge et une liste de positions différentes.
+
+Maintenant que les créatures fonctionnent, il manque encore un élément essentiel au moteur physique : la physique de l’eau.
+
+Il y aurait plusieurs façons de faire. La première serait de programmer une vraie simulation de fluide et d’y placer la créature. Mais simuler des flux d’écoulement demande énormément de calculs, et les simulations d’évolution demandent déjà beaucoup de puissance, puisqu’on simule des centaines de milliers de créatures.
+
+Cette option serait adaptée si on disposait d’un supercalculateur de la NASA. Comme ce n’est pas mon cas et que je fais tourner ça sur un petit Mac rose, on va oublier cette solution.
+
+On va donc utiliser des règles simples qui approximent la réalité tout en étant beaucoup plus rapides à calculer.
+
+Première règle : on considère chaque membre individuellement et on regarde comment son mouvement déplace l’eau, en supposant que l’eau est immobile. Si un membre pousse l’eau dans une direction, on applique une force dans la direction opposée. C’est le principe action-réaction, aussi appelé la troisième loi de Newton.
+
+Avec cette règle seule, on obtient ça.
+
+Deuxième règle : si deux membres sont attachés au même point et que l’angle entre eux est faible, leur interaction devient importante et on ne peut plus les considérer indépendamment. Dans ce cas, on regarde le volume d’eau expulsé et la vitesse d’expulsion, ce qui nous donne l’accélération et la résistance à appliquer.
+
+Ces règles combinées donnent une physique très proche d’une vraie simulation de fluide, tout en étant environ mille fois plus rapide à calculer.
+
+Et voilà, le fonctionnement complet des créatures aquatiques est terminé. On va maintenant les faire évoluer.
+
+L’évolution va se passer comme suit : on génère 1000 créatures, on les laisse nager pendant 10 secondes, on leur donne un score, et on garde les 500 meilleures. Ces 500 vont se reproduire : chacune produit une copie d’elle-même avec des mutations.
+
+Les mutations peuvent être un changement dans les positions que la créature essaie d’atteindre, un changement de sa vitesse d’horloge, ou plus rarement l’ajout ou la suppression d’un ou plusieurs membres.
+
+Ensuite, on recommence : on teste, on note, on sélectionne.
+
+Il reste à définir ce qu’est une “bonne” créature. On pourrait simplement choisir les plus rapides, mais quand on fait ça, on obtient des horreurs visuelles absolument nulles.
+
+Le problème, c’est que dans la nature, il ne suffit pas d’aller vite. Il faut aussi être efficient, c’est-à-dire utiliser le moins d’énergie possible. Cette pression à économiser de l’énergie est ce qui crée les mouvements fluides et élégants qu’on observe dans la nature.
+
+On ajoute donc un second critère : la dépense énergétique. On privilégie les créatures qui consomment peu d’énergie.
+
+Mais un nouveau problème apparaît : les grosses créatures dépensent forcément plus d’énergie. On ajoute donc un dernier critère : la taille. Une créature est autorisée à dépenser une quantité d’énergie proportionnelle à sa taille.
+
+Ça y est, tous les critères de sélection sont en place. On peut enfin lancer la simulation.
+
+À la génération 1, on a 1000 créatures totalement aléatoires. Elles sont toutes différentes, mais elles ont un point commun : elles sont nulles. La meilleure créature est une forme extrêmement simple, avec une seule articulation. On peut appeler ça une méduse.
+
+Au début, les petites créatures sont avantagées, car il est plus probable qu’elles fassent quelque chose de correct par hasard. Malgré tout, on observe déjà des mouvements intéressants : des ondulations, des poussées, etc.
+
+Je vais maintenant arrêter de commenter et vous laisser avec un montage de l’évolution des meilleures créatures au fil des générations.
+
+…
+
+Arrivé à la fin, j’ai été sincèrement bouleversé. J’espère vous avoir mis des étoiles dans les yeux.
+
+Pour comprendre ce qui fonctionne, on analyse les meilleures créatures. La méduse avance parce que sa forme est plus hydrodynamique après la contraction que lors de l’ouverture. Chaque cycle produit donc une avancée nette.
+
+Ensuite, apparaissent des créatures plus complexes, puis enfin les serpents. À partir de la génération 55, ce sont quasiment uniquement des serpents qui dominent.
+
+La raison est simple : contrairement aux autres créatures, le serpent n’a presque pas de phase négative où il se freine. Il propage une onde le long de son corps, expulse un grand volume d’eau vers l’arrière et revient naturellement à sa position initiale. C’est extrêmement efficace, et très proche de ce qu’on observe chez les animaux marins réels.
+
+Pour conclure : dites-moi dans les commentaires si vous voulez voir des créatures évoluer pour courir, grimper, sauter, ou autre chose.
+
+Merci à tous ceux qui ont attendu mon retour, merci à ceux qui m’ont envoyé des messages d’encouragement, merci aussi aux 53 personnes qui ont disliké ma vidéo précédente, et surtout merci à vous d’avoir regardé.
+
+À très bientôt pour une nouvelle vidéo où je crée une IA qui joue à…
+
+Ciao.
